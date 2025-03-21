@@ -18,7 +18,7 @@ export class FileStoreService {
     buffer: Buffer,
     fileName: string,
     path?: string,
-  ): Promise<FileInfo> {
+  ): Promise<StoreFileInfo> {
     const fileData = await this.fileStore.uploadFile(buffer, fileName);
     const ext = extname(fileName);
     const fileNameWithoutExtention = fileName.replace(ext, '');
@@ -69,7 +69,7 @@ export class FileStoreService {
     return this.fileStore.streamFile(file.key);
   }
 
-  async deleteFile(id: string): Promise<FileInfo> {
+  async deleteFile(id: string): Promise<StoreFileInfo> {
     const file = await this.prisma.file.findUnique({
       where: { id },
       select: {

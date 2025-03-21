@@ -1,4 +1,4 @@
-declare interface FileInfo {
+declare interface StoreFileInfo {
   id: string;
   name: string;
   size: number;

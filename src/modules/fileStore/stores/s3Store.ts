@@ -29,7 +29,7 @@ export class S3Store implements FileStore {
     }
   }
 
-  async uploadFile(buffer: Buffer, fileName: string): Promise<FileInfo> {
+  async uploadFile(buffer: Buffer, fileName: string): Promise<StoreFileInfo> {
     const key = `${nanoid(6)}-${fileName}`;
     const mimetype = mime.getType(fileName) ?? 'application/octet-stream';
     const command = new PutObjectCommand({
