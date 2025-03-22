@@ -84,6 +84,8 @@ export default asRoute(async function (app) {
           request.body.path,
         );
 
+        console.log(files);
+
         return {
           data: files,
         };

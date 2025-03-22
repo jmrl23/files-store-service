@@ -1,8 +1,9 @@
-import { Boom } from '@hapi/boom';
+import { BadRequest } from 'http-errors';
 import { PrismaClient } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { customAlphabet } from 'nanoid';
 import { extname } from 'node:path';
+import { NotFound } from 'http-errors';
 
 const nanoid = customAlphabet(
   '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
@@ -21,6 +22,10 @@ export class FileStoreService {
     fileName: string,
     path?: string,
   ): Promise<StoreFileInfo> {
+    if (path?.includes('#') || path?.startsWith('/') || path?.endsWith('/')) {
+      throw new BadRequest('Invalid path');
+    }
+
     const fileData = await this.fileStore.uploadFile(buffer, fileName);
 
     function generateFileName(name: string): string {
@@ -46,7 +51,7 @@ export class FileStoreService {
       data: {
         key: fileData.id,
         name: newFileName,
-        path,
+        path: path ? encodeURI(path) : null,
         size: fileData.size,
         mimetype: fileData.mimetype,
       },
@@ -92,7 +97,7 @@ export class FileStoreService {
         name: {
           startsWith: payload.name,
         },
-        path: payload.path,
+        path: payload.path ? encodeURI(payload.path) : payload.path,
         mimetype: payload.mimetype,
         size: {
           gte: payload.sizeFrom,
@@ -134,9 +139,7 @@ export class FileStoreService {
     });
 
     if (!file) {
-      throw new Boom('File not found', {
-        statusCode: 404,
-      });
+      throw new NotFound();
     }
 
     return this.fileStore.streamFile(file.key);
@@ -156,9 +159,7 @@ export class FileStoreService {
     });
 
     if (!file) {
-      throw new Boom('File not found', {
-        statusCode: 404,
-      });
+      throw new NotFound('File not found');
     }
 
     await this.fileStore.deleteFile(file.key);

@@ -10,7 +10,7 @@ export class FilesService {
     files: MultipartFile[],
     path?: string,
   ): Promise<StoreFileInfo[]> {
-    const settledUploads = await Promise.allSettled(
+    const uploadedFiles = await Promise.all(
       files.map(async (file) =>
         this.fileStoreService.uploadFile(
           await file.toBuffer(),
@@ -19,9 +19,6 @@ export class FilesService {
         ),
       ),
     );
-    const uploadedFiles = settledUploads
-      .filter((result) => result.status === 'fulfilled')
-      .map((result) => result.value);
 
     return uploadedFiles;
   }

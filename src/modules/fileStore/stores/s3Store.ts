@@ -7,8 +7,8 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Boom } from '@hapi/boom';
 import mime from 'mime';
+import { NotFound } from 'http-errors';
 import { nanoid } from 'nanoid';
 import { Readable } from 'node:stream';
 
@@ -72,8 +72,6 @@ export class S3Store implements FileStore {
       return result.Body;
     }
 
-    throw new Boom('File not found', {
-      statusCode: 404,
-    });
+    throw new NotFound('File not found');
   }
 }
