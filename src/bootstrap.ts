@@ -10,6 +10,9 @@ import { logger } from './common/logger';
 import { CORS_ORIGIN } from './config/env';
 import { routesAutoloadPlugin } from './plugin/routesAutoload';
 import { swaggerPlugin } from './plugin/swagger';
+import fastifyRateLimit from '@fastify/rate-limit';
+import ms from 'ms';
+import { Redis } from 'ioredis';
 
 export const bootstrap = fastifyPlugin(async function (app) {
   await app.register(fastifyEtag);
@@ -18,6 +21,12 @@ export const bootstrap = fastifyPlugin(async function (app) {
 
   await app.register(fastifyCors, {
     origin: CORS_ORIGIN,
+  });
+
+  await app.register(fastifyRateLimit, {
+    max: 100,
+    timeWindow: ms('1m'),
+    redis: new Redis(process.env.REDIS_URL ?? ''),
   });
 
   await app.register(swaggerPlugin);
