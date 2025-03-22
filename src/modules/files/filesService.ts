@@ -37,7 +37,7 @@ export class FilesService {
 
   public async getFileData(
     name: string,
-    path?: string,
+    path: string = '',
   ): Promise<{
     fileInfo: StoreFileInfo;
     stream: NodeJS.ReadableStream;

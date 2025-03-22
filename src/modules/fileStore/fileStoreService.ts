@@ -20,7 +20,7 @@ export class FileStoreService {
   async uploadFile(
     buffer: Buffer,
     fileName: string,
-    path?: string,
+    path: string = '',
   ): Promise<StoreFileInfo> {
     if (path?.includes('#') || path?.startsWith('/') || path?.endsWith('/')) {
       throw new BadRequest('Invalid path');
@@ -51,7 +51,7 @@ export class FileStoreService {
       data: {
         key: fileData.id,
         name: newFileName,
-        path: path ? encodeURI(path) : null,
+        path: encodeURI(path),
         size: fileData.size,
         mimetype: fileData.mimetype,
       },

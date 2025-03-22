@@ -105,7 +105,7 @@ export default asRoute(async function (app) {
       },
       async handler(request, reply) {
         const pathSegments = request.url.substring(1).split('/');
-        pathSegments.splice(0, 2);
+        pathSegments.splice(0, 1);
 
         const fileName = pathSegments.pop()!;
         const filePath = pathSegments.join('/');

@@ -19,7 +19,7 @@ model File {
   key       String   @unique // unique identifier for external services (stores)
 
   name     String
-  path     String?
+  path     String @default("")
   mimetype String
   size     Int
 }
