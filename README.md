@@ -2,6 +2,12 @@
 
 Simple file management system built with [fastify](https://fastify.dev/)
 
+## Prerequisites
+
+- [redis](https://redis.io/)
+- [postgres](https://www.postgresql.org/)
+- [s3](https://aws.amazon.com/s3/)
+
 ## Installation
 
 ```sh
