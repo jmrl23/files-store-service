@@ -1,7 +1,8 @@
+import { Boom } from '@hapi/boom';
 import { PrismaClient } from '@prisma/client';
+import { Cache } from 'cache-manager';
 import { customAlphabet } from 'nanoid';
 import { extname } from 'node:path';
-import { Boom } from '@hapi/boom';
 
 const nanoid = customAlphabet(
   '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
@@ -10,6 +11,7 @@ const nanoid = customAlphabet(
 
 export class FileStoreService {
   constructor(
+    private readonly cache: Cache,
     private readonly prisma: PrismaClient,
     private readonly fileStore: FileStore,
   ) {}
@@ -56,6 +58,61 @@ export class FileStoreService {
         path: true,
       },
     });
+
+    return result;
+  }
+
+  async listFiles(payload: ListFilesPayload): Promise<StoreFileInfo[]> {
+    const cacheKey = `list:files[ref:payload]:(${JSON.stringify([
+      payload.id,
+      payload.createdAtFrom,
+      payload.createdAtTo,
+      payload.skip,
+      payload.take,
+      payload.order,
+      payload.name,
+      payload.mimetype,
+      payload.path,
+      payload.mimetype,
+      payload.sizeFrom,
+      payload.sizeTo,
+    ])})`;
+
+    if (payload.revalidate) {
+      await this.cache.del(cacheKey);
+    }
+
+    const result = await this.prisma.file.findMany({
+      where: {
+        id: payload.id,
+        createdAt: {
+          gte: payload.createdAtFrom,
+          lte: payload.createdAtTo,
+        },
+        name: {
+          startsWith: payload.name,
+        },
+        path: payload.path,
+        mimetype: payload.mimetype,
+        size: {
+          gte: payload.sizeFrom,
+          lte: payload.sizeTo,
+        },
+      },
+      skip: payload.skip,
+      orderBy: {
+        createdAt: payload.order,
+      },
+      select: {
+        id: true,
+        name: true,
+        size: true,
+        mimetype: true,
+        path: true,
+      },
+    });
+
+    await this.cache.set(cacheKey, result);
 
     return result;
   }
