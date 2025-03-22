@@ -98,7 +98,7 @@ export default asRoute(async function (app) {
 
     .route({
       method: 'GET',
-      url: '/s/*',
+      url: '/*',
       schema: {
         description: 'Stream file',
         tags: ['files'],
@@ -142,7 +142,7 @@ export default asRoute(async function (app) {
 
     .route({
       method: 'GET',
-      url: '/list',
+      url: '/',
       schema: {
         description: 'List files',
         tags: ['files'],
