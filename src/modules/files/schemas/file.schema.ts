@@ -7,7 +7,7 @@ export const FileSchema = asJsonSchema({
   properties: {
     id: {
       type: 'string',
-      format: 'cuid',
+      format: 'uuid',
     },
     name: {
       type: 'string',

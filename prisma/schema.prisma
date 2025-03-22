@@ -14,7 +14,7 @@ datasource db {
 }
 
 model File {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   key       String   @unique // unique identifier for external services (stores)
 

@@ -163,6 +163,9 @@ export class FileStoreService {
     }
 
     await this.fileStore.deleteFile(file.key);
+    await this.prisma.file.delete({
+      where: { id },
+    });
 
     delete (file as Record<string, unknown>).key;
 

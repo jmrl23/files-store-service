@@ -15,6 +15,7 @@ import KeyVRedis from '@keyv/redis';
 import ms from 'ms';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { FromSchema } from 'json-schema-to-ts';
+import { DeleteFileSchema } from './schemas/deleteFile.schema';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
@@ -84,8 +85,6 @@ export default asRoute(async function (app) {
           request.body.path,
         );
 
-        console.log(files);
-
         return {
           data: files,
         };
@@ -121,6 +120,35 @@ export default asRoute(async function (app) {
 
         return {
           data: files,
+        };
+      },
+    })
+
+    .route({
+      method: 'DELETE',
+      url: '/delete/:id',
+      schema: {
+        description: 'Delete file',
+        tags: ['files'],
+        params: DeleteFileSchema,
+        response: {
+          200: {
+            type: 'object',
+            required: ['data'],
+            properties: {
+              data: FileSchema,
+            },
+          },
+        },
+      },
+      async handler(
+        request: FastifyRequest<{
+          Params: FromSchema<typeof DeleteFileSchema>;
+        }>,
+      ) {
+        const result = await filesService.deleteFile(request.params.id);
+        return {
+          data: result,
         };
       },
     });

@@ -29,4 +29,8 @@ export class FilesService {
     const result = await this.fileStoreService.listFiles(payload);
     return result;
   }
+
+  public async deleteFile(id: string): Promise<StoreFileInfo> {
+    return await this.fileStoreService.deleteFile(id);
+  }
 }
