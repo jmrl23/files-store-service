@@ -1,11 +1,6 @@
-# Fastify Template
+# Files Store Service
 
-template for building fastify application
-
-<picture>
-  <source srcset="https://fastify.dev/img/logos/fastify-white.svg" media="(prefers-color-scheme: dark)" />
-  <img src="https://fastify.dev/img/logos/fastify-black.svg" />
-</picture>
+Simple file management system built with [fastify](https://fastify.dev/)
 
 ## Installation
 
@@ -25,35 +20,6 @@ yarn # or npm install
 | format     | format codes (prettier)                     |
 | lint       | lint codes (eslint)                         |
 
-## Structure
+## Extras
 
-Default folder structure
-
-```
-src
-├── app.ts                            # main fastify instance
-├── bootstrap.ts                      # plugins entrypoint
-├── common
-│   ├── logger.ts
-│   └── typings.ts
-├── config
-│   └── env.ts
-├── init.ts                           # initialization file
-├── main.ts                           # main entrypoint
-├── modules
-│   └── todos
-│       ├── schemas
-│       │   ├── createTodo.schema.ts
-│       │   ├── deleteTodo.schema.ts
-│       │   ├── getTodo.schema.ts
-│       │   ├── getTodos.schema.ts
-│       │   ├── todo.schema.ts
-│       │   └── updateTodo.schema.ts
-│       ├── todos.route.ts
-│       ├── todosService.spec.ts
-│       └── todosService.ts
-├── plugin
-│   ├── routesAutoload.ts
-│   └── swagger.ts
-└── test.ts                           # test entrypoint
-```
+- [fastify template](https://github.com/jmrl23/fastify-template)
