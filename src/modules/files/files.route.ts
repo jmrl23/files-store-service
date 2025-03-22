@@ -100,6 +100,7 @@ export default asRoute(async function (app) {
       method: 'GET',
       url: '/s/*',
       schema: {
+        description: 'Stream file',
         tags: ['files'],
       },
       async handler(request, reply) {

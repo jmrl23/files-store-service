@@ -106,6 +106,7 @@ export class FileStoreService {
         },
       },
       skip: payload.skip,
+      take: payload.take,
       orderBy: {
         createdAt: payload.order,
       },
