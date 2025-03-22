@@ -57,6 +57,7 @@ export class FileStoreService {
       },
       select: {
         id: true,
+        createdAt: true,
         name: true,
         size: true,
         mimetype: true,
@@ -110,6 +111,7 @@ export class FileStoreService {
       },
       select: {
         id: true,
+        createdAt: true,
         name: true,
         size: true,
         mimetype: true,
@@ -122,24 +124,14 @@ export class FileStoreService {
     return result;
   }
 
-  async streamFile(
-    id: string,
-    name: string,
-    path?: string,
-  ): Promise<NodeJS.ReadableStream> {
+  async streamFile(id: string): Promise<NodeJS.ReadableStream> {
     const file = await this.prisma.file.findUnique({
-      where: {
-        id,
-        name,
-        path,
-      },
-      select: {
-        key: true,
-      },
+      where: { id },
+      select: { key: true },
     });
 
     if (!file) {
-      throw new NotFound();
+      throw new NotFound('File not found');
     }
 
     return this.fileStore.streamFile(file.key);
@@ -150,6 +142,7 @@ export class FileStoreService {
       where: { id },
       select: {
         id: true,
+        createdAt: true,
         name: true,
         key: true,
         size: true,

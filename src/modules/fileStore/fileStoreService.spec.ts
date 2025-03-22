@@ -5,6 +5,10 @@ import { describe, it } from 'node:test';
 import { prismaClient } from '../prisma/prismaClient';
 import { fileStoreFactory } from './fileStoreFactory';
 import { FileStoreService } from './fileStoreService';
+import { createCache } from 'cache-manager';
+import Keyv from 'keyv';
+import ms from 'ms';
+import KeyvRedis from '@keyv/redis';
 
 loadEnvFile(path.resolve(__dirname, '../../../.env.development'));
 
@@ -18,7 +22,16 @@ describe('fileStoreService', async () => {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     },
   });
-  const fileStoreService = new FileStoreService(prismaClient, fileStore);
+  const cache = createCache({
+    ttl: ms('30m'),
+    stores: [
+      new Keyv({
+        namespace: 'modules:fileStore',
+        store: new KeyvRedis(process.env.REDIS_URL),
+      }),
+    ],
+  });
+  const fileStoreService = new FileStoreService(cache, prismaClient, fileStore);
 
   let fileId: string;
   let fileName = 'test.txt';
@@ -39,7 +52,7 @@ describe('fileStoreService', async () => {
   });
 
   it('should stream file', async () => {
-    const stream = await fileStoreService.streamFile(fileId, fileName);
+    const stream = await fileStoreService.streamFile(fileId);
     let data = '';
 
     stream.on('data', (chunk) => {
