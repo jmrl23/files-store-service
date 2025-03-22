@@ -20,15 +20,30 @@ export class FileStoreService {
     path?: string,
   ): Promise<StoreFileInfo> {
     const fileData = await this.fileStore.uploadFile(buffer, fileName);
-    const ext = extname(fileName);
-    const fileNameWithoutExtention = fileName.replace(ext, '');
 
-    fileName = `${fileNameWithoutExtention}_${nanoid(6)}${ext}`;
+    function generateFileName(name: string): string {
+      const ext = extname(name);
+      const fileNameWithoutExtention = name.replace(ext, '');
+      const fileName = `${fileNameWithoutExtention}_${nanoid(6)}${ext}`;
+      return fileName;
+    }
+
+    const newFileName = generateFileName(fileName);
+
+    const conflictedFileCount = await this.prisma.file.count({
+      where: {
+        name: newFileName,
+      },
+    });
+
+    if (conflictedFileCount > 0) {
+      return await this.uploadFile(buffer, fileName, path);
+    }
 
     const result = await this.prisma.file.create({
       data: {
         key: fileData.id,
-        name: fileName,
+        name: newFileName,
         path,
         size: fileData.size,
         mimetype: fileData.mimetype,
@@ -38,6 +53,7 @@ export class FileStoreService {
         name: true,
         size: true,
         mimetype: true,
+        path: true,
       },
     });
 
@@ -78,6 +94,7 @@ export class FileStoreService {
         key: true,
         size: true,
         mimetype: true,
+        path: true,
       },
     });
 

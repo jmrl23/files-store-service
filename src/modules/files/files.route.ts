@@ -1,10 +1,32 @@
-import fastifyMultipart, { Multipart } from '@fastify/multipart';
+import fastifyMultipart, { MultipartFile } from '@fastify/multipart';
 import { FastifyRequest } from 'fastify';
+import os from 'node:os';
+import path from 'node:path';
 import { asRoute } from '../../common/typings';
-import { UploadFileSchema } from './schemas/uploadFile.schema';
+import { fileStoreFactory } from '../fileStore/fileStoreFactory';
+import { FileStoreService } from '../fileStore/fileStoreService';
+import { prismaClient } from '../prisma/prismaClient';
+import { FilesService } from './filesService';
 import { prevalidationFilesUpload } from './handlers/prevalidationFilesUpload';
+import { FileSchema } from './schemas/file.schema';
+import { UploadFileSchema } from './schemas/uploadFile.schema';
 
 export default asRoute(async function (app) {
+  const filesService = new FilesService(
+    new FileStoreService(
+      prismaClient,
+      await fileStoreFactory('s3', {
+        region: process.env.AWS_REGION,
+        endpoint: process.env.AWS_ENDPOINT,
+        forcePathStyle: true,
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        },
+      }),
+    ),
+  );
+
   await app.register(fastifyMultipart, {
     attachFieldsToBody: true,
   });
@@ -18,21 +40,37 @@ export default asRoute(async function (app) {
       tags: ['files'],
       consumes: ['multipart/form-data'],
       body: UploadFileSchema,
+      response: {
+        200: {
+          type: 'object',
+          required: ['data'],
+          properties: {
+            data: {
+              type: 'array',
+              items: FileSchema,
+            },
+          },
+        },
+      },
     },
     async handler(
       request: FastifyRequest<{
         Body: {
           path: string;
-          files: Multipart[];
+          files: MultipartFile[];
         };
       }>,
     ) {
-      const files = request.body.files;
-
-      console.log(files);
+      await request.saveRequestFiles({
+        tmpdir: path.resolve(os.tmpdir()),
+      });
+      const files = await filesService.upload(
+        request.body.files,
+        request.body.path,
+      );
 
       return {
-        message: 'success!',
+        data: files,
       };
     },
   });
