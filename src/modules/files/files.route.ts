@@ -1,7 +1,6 @@
 import fastifyMultipart, { MultipartFile } from '@fastify/multipart';
 import KeyvRedis from '@keyv/redis';
 import { createCache } from 'cache-manager';
-import etag from 'etag';
 import { FastifyRequest } from 'fastify';
 import { FromSchema } from 'json-schema-to-ts';
 import { Keyv } from 'keyv';
@@ -20,6 +19,7 @@ import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
+import { generateEtag } from './utils/generateEtag';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
@@ -132,9 +132,7 @@ export default asRoute(async function (app) {
           'content-length': data.fileInfo.size,
           'content-type': data.fileInfo.mimetype,
           'cache-control': 'public, max-age=1800, must-revalidate',
-          etag: etag(fs.readFileSync(tempFilePath), {
-            weak: false,
-          }),
+          etag: await generateEtag(tempFilePath),
         });
         return fs.createReadStream(tempFilePath);
       },
