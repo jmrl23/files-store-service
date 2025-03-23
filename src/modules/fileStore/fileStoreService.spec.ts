@@ -6,7 +6,7 @@ import assert from 'node:assert';
 import path from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { before, after, describe, it } from 'node:test';
-import { prismaClient } from '../prisma/prismaClient';
+import { prismaClient } from '../../common/prismaClient';
 import { fileStoreFactory } from './fileStoreFactory';
 import { FileStoreService } from './fileStoreService';
 

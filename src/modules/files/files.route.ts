@@ -12,7 +12,7 @@ import { pipeline } from 'node:stream/promises';
 import { asRoute } from '../../common/typings';
 import { fileStoreFactory } from '../fileStore/fileStoreFactory';
 import { FileStoreService } from '../fileStore/fileStoreService';
-import { prismaClient } from '../prisma/prismaClient';
+import { prismaClient } from '../../common/prismaClient';
 import { FilesService } from './filesService';
 import { prevalidationFilesUpload } from './handlers/prevalidationFilesUpload';
 import { DeleteFileSchema } from './schemas/deleteFile.schema';
