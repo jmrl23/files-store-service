@@ -1,6 +1,6 @@
 # Files Store Service
 
-Simple file management system built with [fastify](https://fastify.dev/)
+Simple file management system API built with [fastify](https://fastify.dev/)
 
 ## Prerequisites
 
