@@ -19,7 +19,7 @@ import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
-import { generateEtag } from './utils/generateEtag';
+import { generateEtag } from '../../common/utils/generateEtag';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(

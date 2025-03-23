@@ -9,8 +9,8 @@ import {
 } from '@aws-sdk/client-s3';
 import mime from 'mime';
 import { NotFound } from 'http-errors';
-import { nanoid } from 'nanoid';
 import { Readable } from 'node:stream';
+import { nanoid } from '../../../common/utils/nanoid';
 
 export class S3Store implements FileStore {
   constructor(

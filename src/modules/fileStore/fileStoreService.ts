@@ -1,14 +1,9 @@
 import { BadRequest } from 'http-errors';
 import { PrismaClient } from '@prisma/client';
 import { Cache } from 'cache-manager';
-import { customAlphabet } from 'nanoid';
 import { extname } from 'node:path';
 import { NotFound } from 'http-errors';
-
-const nanoid = customAlphabet(
-  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-  6,
-);
+import { nanoid } from '../../common/utils/nanoid';
 
 export class FileStoreService {
   constructor(
