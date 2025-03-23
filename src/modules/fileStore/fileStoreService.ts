@@ -60,6 +60,7 @@ export class FileStoreService {
       },
     });
 
+    await this.cache.clear();
     return result;
   }
 
@@ -82,6 +83,9 @@ export class FileStoreService {
     if (payload.revalidate) {
       await this.cache.del(cacheKey);
     }
+
+    const cachedData = await this.cache.get<StoreFileInfo[]>(cacheKey);
+    if (cachedData) return cachedData;
 
     const result = await this.prisma.file.findMany({
       where: {
@@ -158,6 +162,7 @@ export class FileStoreService {
 
     delete (file as Record<string, unknown>).key;
 
+    await this.cache.clear();
     return file;
   }
 }

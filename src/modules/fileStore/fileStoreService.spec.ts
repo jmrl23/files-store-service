@@ -1,40 +1,49 @@
+import KeyvRedis from '@keyv/redis';
+import { Cache, createCache } from 'cache-manager';
+import Keyv from 'keyv';
+import ms from 'ms';
 import assert from 'node:assert';
 import path from 'node:path';
 import { loadEnvFile } from 'node:process';
-import { describe, it } from 'node:test';
+import { before, after, describe, it } from 'node:test';
 import { prismaClient } from '../prisma/prismaClient';
 import { fileStoreFactory } from './fileStoreFactory';
 import { FileStoreService } from './fileStoreService';
-import { createCache } from 'cache-manager';
-import Keyv from 'keyv';
-import ms from 'ms';
-import KeyvRedis from '@keyv/redis';
 
 loadEnvFile(path.resolve(__dirname, '../../../.env.development'));
 
-describe('fileStoreService', async () => {
-  const fileStore = await fileStoreFactory('s3', {
-    region: process.env.AWS_REGION,
-    endpoint: process.env.AWS_ENDPOINT,
-    forcePathStyle: true,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-  });
-  const cache = createCache({
-    ttl: ms('30m'),
-    stores: [
-      new Keyv({
-        namespace: 'modules:fileStore',
-        store: new KeyvRedis(process.env.REDIS_URL),
-      }),
-    ],
-  });
-  const fileStoreService = new FileStoreService(cache, prismaClient, fileStore);
+process.env.NODE_ENV = 'test';
 
+describe('fileStoreService test', async () => {
+  let fileStore: FileStore;
+  let cache: Cache;
+  let fileStoreService: FileStoreService;
   let fileId: string;
   let fileName = 'test.txt';
+
+  before(async () => {
+    fileStore = await fileStoreFactory('s3', {
+      region: process.env.AWS_REGION,
+      endpoint: process.env.AWS_ENDPOINT,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+
+    cache = createCache({
+      ttl: ms('30m'),
+      stores: [
+        new Keyv({
+          namespace: 'modules:fileStore',
+          store: new KeyvRedis(process.env.REDIS_URL),
+        }),
+      ],
+    });
+
+    fileStoreService = new FileStoreService(cache, prismaClient, fileStore);
+  });
 
   it('should upload file', async () => {
     const uploadedFile = await fileStoreService.uploadFile(
@@ -68,5 +77,9 @@ describe('fileStoreService', async () => {
     const deletedFile = await fileStoreService.deleteFile(fileId);
 
     assert.strictEqual(fileId, deletedFile.id);
+  });
+
+  after(async () => {
+    await cache.disconnect();
   });
 });
