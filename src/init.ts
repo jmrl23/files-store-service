@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { globSync } from 'glob';
 import path from 'node:path';
 import { logger } from './common/logger';
+import { StoreType } from './modules/fileStore/fileStoreFactory';
 
 console.clear();
 
@@ -11,6 +12,7 @@ declare global {
     // declare types for environment variables
     interface ProcessEnv {
       NODE_ENV: NodeEnv;
+      STORE_SERVICE: StoreType;
       // ...
     }
   }
@@ -47,3 +49,10 @@ for (const envPath of ENV_PATHS) {
   }
   logger.info(`registered env {${envPath}}`);
 }
+
+if (process.env.STORE_SERVICE === undefined) {
+  const defaultStoreService = 's3';
+  logger.warn(`No store service. Used default: ${defaultStoreService}`);
+  process.env.STORE_SERVICE = defaultStoreService;
+}
+logger.info(`store service {${process.env.STORE_SERVICE}}`);

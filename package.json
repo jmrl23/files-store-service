@@ -27,6 +27,7 @@
     "json-schema-to-ts": "^3.1.1",
     "nodemon": "^3.1.7",
     "prettier": "^3.5.3",
+    "prisma": "6.6.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1"
@@ -42,7 +43,7 @@
     "@fastify/swagger": "^9.0.0",
     "@fastify/swagger-ui": "^5.2.2",
     "@keyv/redis": "^4.3.2",
-    "@prisma/client": "^6.5.0",
+    "@prisma/client": "6.6.0",
     "cache-manager": "^6.4.1",
     "detect-port": "^2.1.0",
     "dotenv": "^16.3.1",

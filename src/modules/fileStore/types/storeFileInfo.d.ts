@@ -5,4 +5,5 @@ declare interface StoreFileInfo {
   size: number;
   mimetype: string;
   path?: string;
+  store?: string;
 }

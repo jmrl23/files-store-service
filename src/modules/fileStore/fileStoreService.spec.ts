@@ -6,7 +6,7 @@ import assert from 'node:assert';
 import path from 'node:path';
 import { loadEnvFile } from 'node:process';
 import { before, after, describe, it } from 'node:test';
-import { prismaClient } from '../../common/prismaClient';
+import { prisma } from '../../common/prisma';
 import { fileStoreFactory } from './fileStoreFactory';
 import { FileStoreService } from './fileStoreService';
 
@@ -22,15 +22,7 @@ describe('fileStoreService test', async () => {
   let fileName = 'test.txt';
 
   before(async () => {
-    fileStore = await fileStoreFactory('s3', {
-      region: process.env.AWS_REGION,
-      endpoint: process.env.AWS_ENDPOINT,
-      forcePathStyle: true,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      },
-    });
+    fileStore = await fileStoreFactory('s3');
 
     cache = createCache({
       ttl: ms('30m'),
@@ -42,7 +34,7 @@ describe('fileStoreService test', async () => {
       ],
     });
 
-    fileStoreService = new FileStoreService(cache, prismaClient, fileStore);
+    fileStoreService = new FileStoreService(cache, prisma, fileStore);
   });
 
   it('should upload file', async () => {

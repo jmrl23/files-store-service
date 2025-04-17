@@ -2,8 +2,8 @@ import { MultipartFile } from '@fastify/multipart';
 import { FileStoreService } from '../fileStore/fileStoreService';
 import { FromSchema } from 'json-schema-to-ts';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
-import { PrismaClient } from '@prisma/client';
 import { NotFound } from 'http-errors';
+import { PrismaClient } from '../../../generated/prisma/client';
 
 export class FilesService {
   constructor(
@@ -51,6 +51,7 @@ export class FilesService {
         path: true,
         mimetype: true,
         size: true,
+        store: true,
       },
     });
 

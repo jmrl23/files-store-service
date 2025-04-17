@@ -48,5 +48,8 @@ export const ListFilesPayloadSchema = asJsonSchema({
       type: 'integer',
       minimum: 0,
     },
+    store: {
+      type: 'string',
+    },
   },
 });

@@ -9,21 +9,21 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
+import { prisma } from '../../common/prisma';
 import { asRoute } from '../../common/typings';
+import { generateEtag } from '../../common/utils/generateEtag';
 import { fileStoreFactory } from '../fileStore/fileStoreFactory';
 import { FileStoreService } from '../fileStore/fileStoreService';
-import { prismaClient } from '../../common/prismaClient';
 import { FilesService } from './filesService';
 import { prevalidationFilesUpload } from './handlers/prevalidationFilesUpload';
 import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
-import { generateEtag } from '../../common/utils/generateEtag';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
-    prismaClient,
+    prisma,
     new FileStoreService(
       createCache({
         ttl: ms('30m'),
@@ -34,16 +34,8 @@ export default asRoute(async function (app) {
           }),
         ],
       }),
-      prismaClient,
-      await fileStoreFactory('s3', {
-        region: process.env.AWS_REGION,
-        endpoint: process.env.AWS_ENDPOINT,
-        forcePathStyle: true,
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
-        },
-      }),
+      prisma,
+      await fileStoreFactory(process.env.STORE_SERVICE),
     ),
   );
 

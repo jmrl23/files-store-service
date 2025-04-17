@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -22,4 +23,5 @@ model File {
   path     String @default("")
   mimetype String
   size     Int
+  store    String
 }
