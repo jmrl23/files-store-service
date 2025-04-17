@@ -62,7 +62,6 @@ export class FileStoreService {
       },
     });
 
-    await this.cache.clear();
     return result;
   }
 
@@ -168,7 +167,6 @@ export class FileStoreService {
 
     delete (file as Record<string, unknown>).key;
 
-    await this.cache.clear();
     return file;
   }
 }
