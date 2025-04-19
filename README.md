@@ -6,13 +6,24 @@ Simple file management system API built with [fastify](https://fastify.dev/)
 
 - [redis](https://redis.io/)
 - [postgres](https://www.postgresql.org/)
-- [s3](https://aws.amazon.com/s3/)
 
 ## Installation
 
 ```sh
 yarn # or npm install
 ```
+
+## Getting started
+
+1. Update environment variables `(DATABASE_URL, REDIS_URL, STORE_SERVICE)` based on your setup
+1. Run `npx prisma db push`
+1. Run start script
+
+## Note
+
+- Default `STORE_SERVICE` is `local`
+- For local store, you can specify a different uploads folder by supplying `LOCAL_DIR_PATH` an absolute path
+- You may add your custom store by implementing a file at [store folder](./src/modules/fileStore/stores/) and registering it at [fileStoreFactory](./src/modules/fileStore/fileStoreFactory.ts)
 
 ## Scripts
 

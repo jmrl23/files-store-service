@@ -51,7 +51,7 @@ for (const envPath of ENV_PATHS) {
 }
 
 if (process.env.STORE_SERVICE === undefined) {
-  const defaultStoreService = 's3';
+  const defaultStoreService = 'local';
   logger.warn(`No store service. Used default: ${defaultStoreService}`);
   process.env.STORE_SERVICE = defaultStoreService;
 }
