@@ -1,9 +1,8 @@
-import { BadRequest } from 'http-errors';
 import { Cache } from 'cache-manager';
+import { BadRequest, NotFound } from 'http-errors';
 import { extname } from 'node:path';
-import { NotFound } from 'http-errors';
-import { nanoid } from '../../common/utils/nanoid';
 import { PrismaClient } from '../../../generated/prisma';
+import { nanoid } from '../../common/utils/nanoid';
 
 export class FileStoreService {
   constructor(
@@ -49,7 +48,7 @@ export class FileStoreService {
         path: encodeURI(path),
         size: fileData.size,
         mimetype: fileData.mimetype,
-        store: process.env.STORE_SERVICE!,
+        store: process.env.STORE_SERVICE,
       },
       select: {
         id: true,
@@ -58,7 +57,6 @@ export class FileStoreService {
         size: true,
         mimetype: true,
         path: true,
-        store: true,
       },
     });
 
@@ -79,7 +77,6 @@ export class FileStoreService {
       payload.mimetype,
       payload.sizeFrom,
       payload.sizeTo,
-      payload.store,
     ])})`;
 
     if (payload.revalidate) {
@@ -105,7 +102,7 @@ export class FileStoreService {
           gte: payload.sizeFrom,
           lte: payload.sizeTo,
         },
-        store: payload.store,
+        store: process.env.STORE_SERVICE,
       },
       skip: payload.skip,
       take: payload.take,
@@ -119,7 +116,6 @@ export class FileStoreService {
         size: true,
         mimetype: true,
         path: true,
-        store: true,
       },
     });
 
@@ -152,7 +148,6 @@ export class FileStoreService {
         size: true,
         mimetype: true,
         path: true,
-        store: true,
       },
     });
 
@@ -160,7 +155,7 @@ export class FileStoreService {
       throw new NotFound('File not found');
     }
 
-    await this.fileStore.deleteFile(file.key);
+    await Promise.allSettled([this.fileStore.deleteFile(file.key)]);
     await this.prisma.file.delete({
       where: { id },
     });

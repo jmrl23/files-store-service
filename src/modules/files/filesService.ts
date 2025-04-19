@@ -51,7 +51,6 @@ export class FilesService {
         path: true,
         mimetype: true,
         size: true,
-        store: true,
       },
     });
 

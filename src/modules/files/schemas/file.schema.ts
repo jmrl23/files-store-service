@@ -3,7 +3,7 @@ import { asJsonSchema } from '../../../common/typings';
 export const FileSchema = asJsonSchema({
   type: 'object',
   additionalProperties: false,
-  required: ['id', 'name', 'size', 'mimetype', 'store'],
+  required: ['id', 'name', 'size', 'mimetype'],
   properties: {
     id: {
       type: 'string',
@@ -17,9 +17,6 @@ export const FileSchema = asJsonSchema({
       format: 'integer',
     },
     mimetype: {
-      type: 'string',
-    },
-    store: {
       type: 'string',
     },
     path: {

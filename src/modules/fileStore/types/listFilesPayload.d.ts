@@ -11,5 +11,4 @@ declare interface ListFilesPayload {
   mimetype?: string;
   sizeFrom?: number;
   sizeTo?: number;
-  store?: string;
 }
