@@ -21,7 +21,7 @@ export class FileStoreService {
       throw new BadRequest('Invalid path');
     }
 
-    const fileData = await this.fileStore.uploadFile(buffer, fileName);
+    const fileData = await this.fileStore.uploadFile(buffer, fileName, path);
 
     function generateFileName(name: string): string {
       const ext = extname(name);
