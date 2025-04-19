@@ -29,13 +29,14 @@ export const swaggerPlugin = fastifyPlugin(async function (app) {
       },
       servers,
       components: {
-        // securitySchemes: {
-        //   bearerAuth: {
-        //     type: 'http',
-        //     scheme: 'bearer',
-        //     bearerFormat: 'JWT',
-        //   },
-        // },
+        securitySchemes: {
+          ApiKeyAuth: {
+            type: 'apiKey',
+            in: 'header',
+            name: 'X-API-Key',
+            description: 'Used to authorize access to the API.',
+          },
+        },
       },
     },
   });

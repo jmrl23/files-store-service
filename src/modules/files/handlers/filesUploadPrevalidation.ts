@@ -1,7 +1,7 @@
 import { Multipart } from '@fastify/multipart';
 import { FastifyRequest } from 'fastify';
 
-export async function prevalidationFilesUpload(
+export async function filesUploadPreValidation(
   request: FastifyRequest<{ Body: any }>,
 ) {
   const body = request.body as Record<string, Multipart | Multipart[] | string>;

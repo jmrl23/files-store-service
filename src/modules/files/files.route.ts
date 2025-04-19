@@ -15,11 +15,12 @@ import { generateEtag } from '../../common/utils/generateEtag';
 import { fileStoreFactory } from '../fileStore/fileStoreFactory';
 import { FileStoreService } from '../fileStore/fileStoreService';
 import { FilesService } from './filesService';
-import { prevalidationFilesUpload } from './handlers/prevalidationFilesUpload';
+import { filesUploadPreValidation } from './handlers/filesUploadPrevalidation';
 import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
+import { apiKeyAuthPreHandler } from './handlers/apiKeyAuthPreHandler';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
@@ -54,11 +55,11 @@ export default asRoute(async function (app) {
     .route({
       method: 'POST',
       url: '/upload',
-      preValidation: [prevalidationFilesUpload],
       schema: {
         description: 'Upload files (uses `files` field)',
         tags: ['files'],
         consumes: ['multipart/form-data'],
+        security: [{ ApiKeyAuth: [] }],
         body: UploadFileSchema,
         response: {
           200: {
@@ -73,6 +74,8 @@ export default asRoute(async function (app) {
           },
         },
       },
+      preValidation: [filesUploadPreValidation],
+      preHandler: [apiKeyAuthPreHandler],
       async handler(
         request: FastifyRequest<{
           Body: {
@@ -143,6 +146,7 @@ export default asRoute(async function (app) {
       schema: {
         description: 'List files',
         tags: ['files'],
+        security: [{ ApiKeyAuth: [] }],
         querystring: ListFilesPayloadSchema,
         response: {
           200: {
@@ -157,6 +161,7 @@ export default asRoute(async function (app) {
           },
         },
       },
+      preHandler: [apiKeyAuthPreHandler],
       async handler(
         request: FastifyRequest<{
           Querystring: FromSchema<typeof ListFilesPayloadSchema>;
@@ -176,6 +181,7 @@ export default asRoute(async function (app) {
       schema: {
         description: 'Delete file',
         tags: ['files'],
+        security: [{ ApiKeyAuth: [] }],
         params: DeleteFileSchema,
         response: {
           200: {
@@ -187,6 +193,7 @@ export default asRoute(async function (app) {
           },
         },
       },
+      preHandler: [apiKeyAuthPreHandler],
       async handler(
         request: FastifyRequest<{
           Params: FromSchema<typeof DeleteFileSchema>;
