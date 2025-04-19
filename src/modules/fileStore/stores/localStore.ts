@@ -42,7 +42,7 @@ export class LocalStore implements FileStore {
   }
 
   private async cleanDir(): Promise<void> {
-    const dirs = globSync(this.options.dirPath + '/**/*', {
+    const dirs = globSync(joinPaths(this.options.dirPath, '/**/*'), {
       absolute: true,
     }).filter((path) => fs.statSync(path).isDirectory());
     for (const dir of dirs) {
