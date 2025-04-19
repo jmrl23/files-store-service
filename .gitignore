@@ -9,3 +9,5 @@ yarn-error.log*
 .env*.local
 /prisma/.env
 /generated
+/local_uploads/*
+!/local_uploads/.gitkeep

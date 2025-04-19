@@ -1,5 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { S3Store } from './stores/s3Store';
+import { LocalStore } from './stores/localStore';
+import path from 'node:path';
 
 /**
  * Register your custom stores here and don't forget to add StoreType.
@@ -10,7 +12,7 @@ import { S3Store } from './stores/s3Store';
  * ```
  */
 
-export type StoreType = 's3';
+export type StoreType = 's3' | 'local';
 
 export async function fileStoreFactory(
   storeType: StoreType,
@@ -29,5 +31,12 @@ export async function fileStoreFactory(
       const s3Store = new S3Store(s3Client, process.env.AWS_BUCKET);
       await s3Store.initialize();
       return s3Store;
+    case 'local':
+      const localStore = new LocalStore({
+        dirPath:
+          process.env.LOCAL_DIR_PATH ??
+          path.resolve(__dirname, '../../../local_uploads'),
+      });
+      return localStore;
   }
 }

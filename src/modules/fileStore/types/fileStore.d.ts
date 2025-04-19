@@ -3,7 +3,7 @@ declare interface FileStore {
     buffer: Buffer,
     fileName: string,
     path?: string,
-  ): Promise<FileInfo>;
+  ): Promise<StoreFileInfo>;
   deleteFile(id: string): Promise<void>;
   streamFile(id: string): Promise<NodeJS.ReadableStream>;
 }
