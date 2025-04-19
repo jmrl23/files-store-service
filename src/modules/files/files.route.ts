@@ -39,8 +39,15 @@ export default asRoute(async function (app) {
     ),
   );
 
+  const fileSizeLimit = Number.isNaN(Number(process.env.FILE_SIZE_LIMIT))
+    ? 500_000_000 // 500MB
+    : Number(process.env.FILE_SIZE_LIMIT);
+
   await app.register(fastifyMultipart, {
     attachFieldsToBody: true,
+    limits: {
+      fileSize: fileSizeLimit,
+    },
   });
 
   app
