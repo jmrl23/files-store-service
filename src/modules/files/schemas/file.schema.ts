@@ -9,6 +9,10 @@ export const FileSchema = asJsonSchema({
       type: 'string',
       format: 'uuid',
     },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+    },
     name: {
       type: 'string',
     },
