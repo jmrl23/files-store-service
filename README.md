@@ -37,6 +37,12 @@ yarn # or npm install
 | format     | format codes (prettier)                     |
 | lint       | lint codes (eslint)                         |
 
+## Frontend/ Client
+
+- Located at [client folder](./client)
+- Client is totally optional
+- It is just a vite react application, you just have to build it and the server will statically serve its dist
+
 ## Extras
 
 - [fastify template](https://github.com/jmrl23/fastify-template)

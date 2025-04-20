@@ -4,6 +4,11 @@ import { Separator } from '@/components/ui/separator';
 import { useFiles, UseFilesPayload } from '@/hooks/useFiles';
 import { useState } from 'react';
 
+const now = new Date();
+now.setHours(23);
+now.setMinutes(59);
+now.setSeconds(59);
+
 function Main() {
   const [payload, setPayload] = useState<UseFilesPayload>({
     skip: 0,
@@ -14,7 +19,7 @@ function Main() {
     name: undefined,
     path: undefined,
     createdAtFrom: new Date(0),
-    createdAtTo: new Date(),
+    createdAtTo: now,
   });
   const { data: files, isLoading, revalidate } = useFiles(payload);
 
@@ -27,7 +32,7 @@ function Main() {
         isLoading={isLoading}
       />
       <Separator orientation='horizontal' />
-      <FilesTable files={files} />
+      <FilesTable files={files} revalidate={revalidate} />
     </main>
   );
 }

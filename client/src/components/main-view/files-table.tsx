@@ -38,6 +38,7 @@ import { useCopyToClipboard } from 'usehooks-ts';
 
 interface FilesTableProps {
   files?: FileInfo[];
+  revalidate(): Promise<void>;
 }
 
 export function FilesTable(props: FilesTableProps) {
@@ -160,7 +161,8 @@ export function FilesTable(props: FilesTableProps) {
                               }),
                               {
                                 loading: `Deleting file: ${file.id}`,
-                                success() {
+                                async success() {
+                                  await props.revalidate();
                                   return <p>Deleted successfully</p>;
                                 },
                                 error(error) {

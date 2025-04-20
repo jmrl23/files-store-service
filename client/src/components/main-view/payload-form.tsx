@@ -79,7 +79,7 @@ const formSchema = z.object({
 export interface PayloadFormProps {
   values: z.infer<typeof formSchema>;
   setValues(values: z.infer<typeof formSchema>): void;
-  revalidate(): void;
+  revalidate(): Promise<void>;
   isLoading: boolean;
 }
 
@@ -127,15 +127,20 @@ export function PayloadForm(props: PayloadFormProps) {
       }),
       {
         loading: 'Uploading files..',
-        success(response) {
-          props.revalidate();
+        async success(response) {
+          await props.revalidate();
           const files = response.data.data;
           return (
             <div>
-              {files.map((file) => (
-                <p key={file.id}>
-                  {file.path} | {file.name}
-                </p>
+              {files.map((file, index) => (
+                <div key={file.id}>
+                  <p>
+                    {file.path} | {file.name}
+                  </p>
+                  {index < files.length - 1 && (
+                    <Separator orientation='horizontal' />
+                  )}
+                </div>
               ))}
             </div>
           );
@@ -331,6 +336,7 @@ export function PayloadForm(props: PayloadFormProps) {
                       classNames={{ trigger: 'rounded-r-none' }}
                       value={field.value}
                       onChange={field.onChange}
+                      hideTime
                     />
                   </FormControl>
                   <FormDescription />
@@ -348,6 +354,7 @@ export function PayloadForm(props: PayloadFormProps) {
                       classNames={{ trigger: 'rounded-l-none' }}
                       value={field.value}
                       onChange={field.onChange}
+                      hideTime
                     />
                   </FormControl>
                   <FormDescription />

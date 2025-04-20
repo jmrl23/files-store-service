@@ -48,9 +48,7 @@ export function useFiles(payload: UseFilesPayload = {}) {
         apiKey: apiContext.key,
         revalidate: true,
       });
-      // TODO: Fix revalidation
-      console.log('new data', newData);
-      queryClient.setQueryData(queryKey, newData);
+      await queryClient.setQueryData(queryKey, newData);
     },
   };
 }

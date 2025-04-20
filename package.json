@@ -11,7 +11,7 @@
     "client"
   ],
   "scripts": {
-    "build": "tsc --build && yarn workspace client run build",
+    "build": "tsc --build",
     "test": "ts-node src/test.ts",
     "start": "node .",
     "start:dev": "nodemon -q",
