@@ -1,15 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import AuthView from '@/AuthView';
+import { useApiContext } from '@/contexts/api-context';
+import MainView from '@/MainView';
 
 function App() {
-  const [count, setCount] = useState<number>(0);
+  const { key } = useApiContext();
 
-  return (
-    <div className='m-4'>
-      <p>count: {count}</p>
-      <Button onClick={() => setCount((count) => count + 1)}>Click me</Button>
-    </div>
-  );
+  if (!key) return <AuthView />;
+  return <MainView />;
 }
 
 export default App;

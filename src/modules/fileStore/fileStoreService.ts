@@ -139,7 +139,7 @@ export class FileStoreService {
 
   async deleteFile(id: string): Promise<StoreFileInfo> {
     const file = await this.prisma.file.findUnique({
-      where: { id },
+      where: { id, store: process.env.STORE_SERVICE },
       select: {
         id: true,
         createdAt: true,

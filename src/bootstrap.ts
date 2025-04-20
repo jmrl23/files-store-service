@@ -21,6 +21,7 @@ export const bootstrap = fastifyPlugin(async function (app) {
 
   await app.register(fastifyCors, {
     origin: CORS_ORIGIN,
+    methods: ['OPTIONS', 'GET', 'POST', 'DELETE'],
   });
 
   await app.register(fastifyRateLimit, {
