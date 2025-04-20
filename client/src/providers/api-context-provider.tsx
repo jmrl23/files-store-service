@@ -4,7 +4,7 @@ import { PropsWithChildren, useState } from 'react';
 export type ApiContextProviderProps = PropsWithChildren & {};
 
 export function ApiContextProvider(props: ApiContextProviderProps) {
-  const [key, setKey] = useState<string>('jomariel.authenticate');
+  const [key, setKey] = useState<string>('');
 
   return (
     <ApiContext.Provider value={{ key, setKey }}>

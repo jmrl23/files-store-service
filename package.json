@@ -1,13 +1,17 @@
 {
   "version": "1.0.0",
+  "private": true,
   "name": "files-store-service",
   "description": "Simple file management system API built with fastify",
   "repository": "https://github.com/jmrl23/files-store-service",
   "author": "Jomariel Gaitera <gaiterajomariel@gmail.com>",
   "main": "build/main.js",
   "license": "MIT",
+  "workspaces": [
+    "client"
+  ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build && yarn workspace client run build",
     "test": "ts-node src/test.ts",
     "start": "node .",
     "start:dev": "nodemon -q",
