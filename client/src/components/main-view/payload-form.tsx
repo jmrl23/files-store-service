@@ -335,7 +335,14 @@ export function PayloadForm(props: PayloadFormProps) {
                     <DateTimePicker
                       classNames={{ trigger: 'rounded-r-none' }}
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(value) => {
+                        if (value) {
+                          value.setHours(0);
+                          value.setMinutes(0);
+                          value.setSeconds(0);
+                          field.onChange(value);
+                        }
+                      }}
                       hideTime
                     />
                   </FormControl>
@@ -353,7 +360,14 @@ export function PayloadForm(props: PayloadFormProps) {
                     <DateTimePicker
                       classNames={{ trigger: 'rounded-l-none' }}
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={(value) => {
+                        if (value) {
+                          value.setHours(23);
+                          value.setMinutes(59);
+                          value.setSeconds(59);
+                          field.onChange(value);
+                        }
+                      }}
                       hideTime
                     />
                   </FormControl>
