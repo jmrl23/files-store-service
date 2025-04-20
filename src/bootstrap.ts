@@ -41,7 +41,10 @@ export const bootstrap = fastifyPlugin(async function (app) {
   });
 
   await app.register(fastifyStatic, {
-    root: path.resolve(__dirname, '../public'),
+    root: [
+      path.resolve(__dirname, '../public'),
+      path.resolve(__dirname, '../client/dist'),
+    ],
   });
 
   await postConfigurations(app);
