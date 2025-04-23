@@ -1,4 +1,3 @@
-import './init';
 import { detect } from 'detect-port';
 import { app } from './app';
 import { bootstrap } from './bootstrap';

@@ -12,10 +12,10 @@
   ],
   "scripts": {
     "build": "tsc --build",
-    "test": "ts-node src/test.ts",
-    "start": "node .",
+    "test": "dotenv -v NODE_ENV=test -- ts-node -r ./src/init.ts src/test.ts",
+    "start": "node -r ./build/init.js .",
     "start:dev": "nodemon -q",
-    "start:prod": "dotenv -v NODE_ENV=production -- node .",
+    "start:prod": "dotenv -v NODE_ENV=production -- node -r ./build/init.js .",
     "format": "prettier --write \"src/**/*.{ts,js}\"",
     "lint": "eslint"
   },
