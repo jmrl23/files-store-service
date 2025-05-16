@@ -1,5 +1,5 @@
 import { globSync } from 'glob';
-import mime from 'mime';
+import mime from 'mime-types';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { join as joinPaths } from 'node:path';
@@ -28,7 +28,7 @@ export class LocalStore implements FileStore {
       id: filePath,
       name: fileName,
       size: buffer.length,
-      mimetype: mime.getType(filePath) ?? 'application/octet-stream',
+      mimetype: mime.lookup(filePath) || 'application/octet-stream',
     };
   }
 

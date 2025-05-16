@@ -7,7 +7,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import mime from 'mime';
+import mime from 'mime-types';
 import { NotFound } from 'http-errors';
 import { Readable } from 'node:stream';
 import { nanoid } from '../../../common/utils/nanoid';
@@ -31,7 +31,7 @@ export class S3Store implements FileStore {
 
   async uploadFile(buffer: Buffer, fileName: string): Promise<StoreFileInfo> {
     const key = `${nanoid(6)}-${fileName}`;
-    const mimetype = mime.getType(fileName) ?? 'application/octet-stream';
+    const mimetype = mime.lookup(fileName) || 'application/octet-stream';
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
