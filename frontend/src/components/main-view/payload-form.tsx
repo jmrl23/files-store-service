@@ -106,9 +106,15 @@ export function PayloadForm(props: PayloadFormProps) {
   const apiContext = useApiContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const uploadPathRef = useRef<HTMLInputElement>(null);
   async function uploadFiles() {
     const formData = new FormData();
     const files = fileInputRef.current?.files;
+
+    const filePath = uploadPathRef.current?.value.trim();
+    if (filePath) {
+      formData.append('path', filePath);
+    }
 
     if (!files || files.length < 1) {
       toast.error('No file attached');
@@ -500,6 +506,25 @@ export function PayloadForm(props: PayloadFormProps) {
                 </DialogDescription>
               </DialogHeader>
               <Input type='file' multiple ref={fileInputRef} />
+
+              <FormField
+                name='filePath'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Path</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type='text'
+                        autoComplete='off'
+                        ref={uploadPathRef}
+                      />
+                    </FormControl>
+                    <FormDescription />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <DialogFooter>
                 <DialogClose asChild>
                   <Button type='button' variant={'outline'} title='Close'>

@@ -36,7 +36,12 @@ export function useFiles(payload: UseFilesPayload = {}) {
   ];
   const data = useQuery({
     queryKey,
-    queryFn: () => fetchFiles({ ...payload, apiKey: apiContext.key }),
+    queryFn: () =>
+      fetchFiles({
+        ...payload,
+        apiKey: apiContext.key,
+        setKey: apiContext.setKey,
+      }),
   });
 
   return {
@@ -57,6 +62,7 @@ async function fetchFiles(
   payload: UseFilesPayload & {
     apiKey?: string;
     revalidate?: boolean;
+    setKey?: (key: string) => void;
   },
 ): Promise<FileInfo[]> {
   try {
@@ -71,6 +77,7 @@ async function fetchFiles(
     if (error instanceof AxiosError) {
       toast.error(JSON.stringify(error.response?.data, null, 2));
     }
+    payload.setKey?.('');
     return [];
   }
 }
