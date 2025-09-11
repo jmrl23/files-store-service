@@ -41,6 +41,7 @@ for (const envPath of ENV_PATHS) {
   const { parsed } = dotenv.config({
     path: envPath,
     override: true,
+    quiet: true,
   });
   const keys = Object.keys(parsed ?? {});
   if (keys.length < 1) continue;

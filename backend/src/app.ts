@@ -4,7 +4,9 @@ import { ajvFilePlugin } from '@fastify/multipart';
 
 export const app = fastify({
   loggerInstance: logger,
-  ignoreTrailingSlash: true,
+  routerOptions: {
+    ignoreTrailingSlash: true,
+  },
   ajv: {
     plugins: [ajvFilePlugin],
   },
