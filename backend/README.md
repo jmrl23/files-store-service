@@ -1,6 +1,6 @@
 # Files Store Service
 
-Simple file management system API built with [fastify](https://fastify.dev/)
+File management system API built with [fastify](https://fastify.dev/)
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ yarn # or npm install
 
 ## Frontend/ Client
 
-- Located at [client folder](./client)
+- Located at [client folder](../frontend/)
 - Client is totally optional
 - It is just a vite react application, you just have to build it and the server will statically serve its dist
 

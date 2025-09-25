@@ -33,43 +33,45 @@ function AuthView() {
 
   return (
     <div className='h-screen p-4 flex items-center'>
-      <div className='max-w-[500px] mx-auto'>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='p-4 bg-white shadow rounded-xl'
-          >
-            <h1 className='font-extrabold text-3xl'>Authorization</h1>
-            <p className='text-xs mb-4 text-slate-500 font-bold'>
-              Set API key that will be used to access resources from the server
-            </p>
-            <div className='grid grid-cols-1 gap-2'>
-              <FormField
-                name='apiKey'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>API Key</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        autoComplete='off'
-                        type='password'
-                        autoFocus
-                      />
-                    </FormControl>
-                    <FormDescription />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className='flex justify-end'>
-                <Button type='submit' title='Submit'>
-                  Submit
-                </Button>
+      <div className='w-full'>
+        <div className='max-w-[500px] mx-auto'>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='p-4 bg-white shadow rounded-xl'
+            >
+              <h1 className='font-extrabold text-3xl'>Authorization</h1>
+              <p className='text-xs mb-4 text-slate-500 font-bold'>
+                API Key to access resources
+              </p>
+              <div className='grid grid-cols-1 gap-2'>
+                <FormField
+                  name='apiKey'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Key</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          autoComplete='off'
+                          type='password'
+                          autoFocus
+                        />
+                      </FormControl>
+                      <FormDescription />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className='flex justify-end'>
+                  <Button type='submit' title='Submit'>
+                    Submit
+                  </Button>
+                </div>
               </div>
-            </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </div>
     </div>
   );
