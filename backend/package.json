@@ -52,6 +52,7 @@
     "fastify-plugin": "^5.0.1",
     "glob": "^11.0.3",
     "http-errors": "^2.0.0",
+    "imagekit": "^6.0.0",
     "ioredis": "^5.7.0",
     "keyv": "^5.5.1",
     "mime-types": "^3.0.1",

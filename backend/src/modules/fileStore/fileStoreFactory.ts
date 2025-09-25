@@ -2,6 +2,8 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { S3Store } from './stores/s3Store';
 import { LocalStore } from './stores/localStore';
 import path from 'node:path';
+import { ImagekitStore } from './stores/imagekitStore';
+import ImageKit from 'imagekit';
 
 /**
  * Register your custom stores here and don't forget to add StoreType.
@@ -12,7 +14,7 @@ import path from 'node:path';
  * ```
  */
 
-export type StoreType = 's3' | 'local';
+export type StoreType = 's3' | 'local' | 'imagekit';
 
 export async function fileStoreFactory(
   storeType: StoreType,
@@ -38,5 +40,15 @@ export async function fileStoreFactory(
           path.resolve(__dirname, '../../../local_uploads'),
       });
       return localStore;
+
+    case 'imagekit':
+      const imagekitStore = new ImagekitStore(
+        new ImageKit({
+          publicKey: process.env.IK_PUBLIC_KEY || '',
+          privateKey: process.env.IK_PRIVATE_KEY || '',
+          urlEndpoint: process.env.IK_ENDPOINT || '',
+        }),
+      );
+      return imagekitStore;
   }
 }
