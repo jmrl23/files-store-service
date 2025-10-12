@@ -15,12 +15,12 @@ import { generateEtag } from '../../common/utils/generateEtag';
 import { fileStoreFactory } from '../fileStore/fileStoreFactory';
 import { FileStoreService } from '../fileStore/fileStoreService';
 import { FilesService } from './filesService';
+import { apiKeyAuthPreHandler } from './handlers/apiKeyAuthPreHandler';
 import { filesUploadPreValidation } from './handlers/filesUploadPrevalidation';
 import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
-import { apiKeyAuthPreHandler } from './handlers/apiKeyAuthPreHandler';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
@@ -124,19 +124,23 @@ export default asRoute(async function (app) {
           });
         }
 
+        const readable = fs.createReadStream(tempFilePath);
         await pipeline(data.stream, fs.createWriteStream(tempFilePath));
 
-        reply.raw.on('finish', () => {
-          fs.rmSync(tempPath, { recursive: true });
-        });
-
         reply.headers({
-          'content-length': data.fileInfo.size,
+          // We are not honoring size from database because some store services might alter the file
+          // (e.g: compression) and thus the size will be different
+          'content-length': fs.statSync(tempFilePath).size,
           'content-type': data.fileInfo.mimetype,
           'cache-control': 'public, max-age=1800, must-revalidate',
           etag: await generateEtag(tempFilePath),
         });
-        return fs.createReadStream(tempFilePath);
+
+        await reply.send(readable);
+
+        reply.raw.on('finish', () => {
+          fs.rmSync(tempPath, { recursive: true });
+        });
       },
     })
 
