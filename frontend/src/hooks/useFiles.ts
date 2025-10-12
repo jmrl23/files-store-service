@@ -65,8 +65,8 @@ async function fetchFiles(
     setKey?: (key: string) => void;
   },
 ): Promise<FileInfo[]> {
+  const { setKey, apiKey, ...params } = payload;
   try {
-    const { apiKey, ...params } = payload;
     const response = await api.get<{ data: FileInfo[] }>('/files', {
       headers: { 'X-API-Key': apiKey },
       params,
@@ -77,7 +77,7 @@ async function fetchFiles(
     if (error instanceof AxiosError) {
       toast.error(JSON.stringify(error.response?.data, null, 2));
     }
-    payload.setKey?.('');
+    setKey?.('');
     return [];
   }
 }
