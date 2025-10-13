@@ -5,5 +5,5 @@ declare interface FileStore {
     path?: string,
   ): Promise<StoreFileInfo>;
   deleteFile(id: string): Promise<void>;
-  streamFile(id: string): Promise<NodeJS.ReadableStream>;
+  streamFile(id: string, options?: unknown): Promise<NodeJS.ReadableStream>;
 }

@@ -4,6 +4,7 @@ import { FromSchema } from 'json-schema-to-ts';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { NotFound } from 'http-errors';
 import { PrismaClient } from '../../../generated/prisma/client';
+import { ParsedQs } from 'qs';
 
 export class FilesService {
   constructor(
@@ -38,6 +39,7 @@ export class FilesService {
   public async getFileData(
     name: string,
     path: string = '',
+    query: ParsedQs = {},
   ): Promise<{
     fileInfo: StoreFileInfo;
     stream: NodeJS.ReadableStream;
@@ -56,7 +58,7 @@ export class FilesService {
 
     if (!file) throw NotFound('File not found');
 
-    const stream = await this.fileStoreService.streamFile(file.id);
+    const stream = await this.fileStoreService.streamFile(file.id, query);
     return {
       fileInfo: file,
       stream,

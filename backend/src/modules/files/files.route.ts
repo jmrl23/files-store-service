@@ -20,6 +20,7 @@ import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
+import qs from 'qs';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
@@ -105,14 +106,14 @@ export default asRoute(async function (app) {
         tags: ['files'],
       },
       async handler(request, reply) {
-        const segments = request.url.substring(1).split('/');
-        segments.splice(0, 1);
-
+        const url = new URL(request.url, 'http://app');
+        const segments = url.pathname.substring(1).split('/').slice(1);
         const fileName = segments.pop()!;
         const filePath = segments.join('/');
         const data = await filesService.getFileData(
           decodeURIComponent(fileName),
           decodeURI(filePath),
+          qs.parse(url.search ? url.search.substring(1) : ''),
         );
         const tmpPath = path.resolve(os.tmpdir(), data.fileInfo.id);
         const tmpFile = path.resolve(tmpPath, data.fileInfo.name);
@@ -124,7 +125,7 @@ export default asRoute(async function (app) {
         }
 
         reply.raw.on('close', () => {
-          fs.rmdirSync(tmpPath, {
+          fs.rmSync(tmpPath, {
             recursive: true,
           });
         });

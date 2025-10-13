@@ -4,7 +4,7 @@ import { lookup } from 'mime-types';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import qs from 'node:querystring';
+import { ParsedQs } from 'qs';
 
 export class ImagekitStore implements FileStore {
   constructor(private readonly imagekit: ImageKit) {}
@@ -34,9 +34,13 @@ export class ImagekitStore implements FileStore {
     await this.imagekit.deleteFile(id);
   }
 
-  public async streamFile(fileId: string): Promise<NodeJS.ReadableStream> {
+  public async streamFile(
+    fileId: string,
+    query: ParsedQs,
+  ): Promise<NodeJS.ReadableStream> {
     const { url, name } = await this.imagekit.getFileDetails(fileId);
-    const response = await fetch(url + `&${qs.stringify({ q: 100 })}`);
+    const resourceURL = await this.generateResourceURL(url, query);
+    const response = await fetch(resourceURL);
     const tmpFilePath = path.resolve(
       os.tmpdir(),
       `${fileId}-${Date.now()}${path.extname(name)}`,
@@ -54,5 +58,22 @@ export class ImagekitStore implements FileStore {
     );
 
     return fs.createReadStream(tmpFilePath);
+  }
+
+  private async generateResourceURL(
+    url: string,
+    query: ParsedQs,
+  ): Promise<URL> {
+    const resourceURL = new URL('', url);
+
+    for (const [key, value] of Object.entries(query)) {
+      if (Array.isArray(value)) {
+        for (const v of value) resourceURL.searchParams.append(key, String(v));
+      } else if (value != null) {
+        resourceURL.searchParams.append(key, String(value));
+      }
+    }
+
+    return resourceURL;
   }
 }

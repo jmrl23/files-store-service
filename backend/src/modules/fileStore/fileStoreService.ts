@@ -3,6 +3,7 @@ import { BadRequest, NotFound } from 'http-errors';
 import { extname } from 'node:path';
 import { PrismaClient } from '../../../generated/prisma';
 import { nanoid } from '../../common/utils/nanoid';
+import { ParsedQs } from 'qs';
 
 export class FileStoreService {
   constructor(
@@ -124,7 +125,10 @@ export class FileStoreService {
     return result;
   }
 
-  async streamFile(id: string): Promise<NodeJS.ReadableStream> {
+  async streamFile(
+    id: string,
+    query: ParsedQs = {},
+  ): Promise<NodeJS.ReadableStream> {
     const file = await this.prisma.file.findUnique({
       where: { id },
       select: { key: true },
@@ -134,7 +138,7 @@ export class FileStoreService {
       throw new NotFound('File not found');
     }
 
-    return await this.fileStore.streamFile(file.key);
+    return await this.fileStore.streamFile(file.key, query);
   }
 
   async deleteFile(id: string): Promise<StoreFileInfo> {
