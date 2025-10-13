@@ -5,10 +5,9 @@ import { FastifyRequest } from 'fastify';
 import { FromSchema } from 'json-schema-to-ts';
 import { Keyv } from 'keyv';
 import ms from 'ms';
-import fs from 'node:fs';
+import fs, { createWriteStream } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { pipeline } from 'node:stream/promises';
 import { prisma } from '../../common/prisma';
 import { asRoute } from '../../common/typings';
 import { generateEtag } from '../../common/utils/generateEtag';
@@ -106,41 +105,51 @@ export default asRoute(async function (app) {
         tags: ['files'],
       },
       async handler(request, reply) {
-        const pathSegments = request.url.substring(1).split('/');
-        pathSegments.splice(0, 1);
+        const segments = request.url.substring(1).split('/');
+        segments.splice(0, 1);
 
-        const fileName = pathSegments.pop()!;
-        const filePath = pathSegments.join('/');
+        const fileName = segments.pop()!;
+        const filePath = segments.join('/');
         const data = await filesService.getFileData(
           decodeURIComponent(fileName),
           decodeURI(filePath),
         );
-        const tempPath = path.resolve(os.tmpdir(), data.fileInfo.id);
-        const tempFilePath = path.resolve(tempPath, data.fileInfo.name);
+        const tmpPath = path.resolve(os.tmpdir(), data.fileInfo.id);
+        const tmpFile = path.resolve(tmpPath, data.fileInfo.name);
 
-        if (!fs.existsSync(tempPath)) {
-          fs.mkdirSync(tempPath, {
+        if (!fs.existsSync(tmpPath)) {
+          fs.mkdirSync(tmpPath, {
             recursive: true,
           });
         }
 
-        const readable = fs.createReadStream(tempFilePath);
-        await pipeline(data.stream, fs.createWriteStream(tempFilePath));
+        reply.raw.on('close', () => {
+          fs.rmdirSync(tmpPath, {
+            recursive: true,
+          });
+        });
+
+        data.stream.pipe(createWriteStream(tmpFile));
+
+        let totalBytes = 0;
+        data.stream.on('data', (chunk) => {
+          totalBytes += chunk.length;
+        });
+
+        await new Promise<void>((resolve) => {
+          data.stream.on('end', () => {
+            resolve();
+          });
+        });
 
         reply.headers({
-          // We are not honoring size from database because some store services might alter the file
-          // (e.g: compression) and thus the size will be different
-          'content-length': fs.statSync(tempFilePath).size,
+          'content-length': totalBytes,
           'content-type': data.fileInfo.mimetype,
           'cache-control': 'public, max-age=1800, must-revalidate',
-          etag: await generateEtag(tempFilePath),
+          etag: await generateEtag(tmpFile),
         });
 
-        await reply.send(readable);
-
-        reply.raw.on('finish', () => {
-          fs.rmSync(tempPath, { recursive: true });
-        });
+        return fs.createReadStream(tmpFile);
       },
     })
 

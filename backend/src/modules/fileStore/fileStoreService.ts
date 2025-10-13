@@ -134,7 +134,7 @@ export class FileStoreService {
       throw new NotFound('File not found');
     }
 
-    return this.fileStore.streamFile(file.key);
+    return await this.fileStore.streamFile(file.key);
   }
 
   async deleteFile(id: string): Promise<StoreFileInfo> {
