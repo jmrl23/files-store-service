@@ -1,0 +1,51 @@
+services:
+  backend:
+    container_name: files-services-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      CORS_ORIGIN: "http://localhost"
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/files-store-service?schema=public
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+      API_KEY: app.auth
+      FILE_SIZE_LIMIT: 500_000_000
+      STORE_SERVICE: local # loca, s3, or imagekit
+      # AWS_KEY_ID: test
+      # AWS_SECRET_ACCESS_KEY=: test
+      # AWS_REGION: us-east-1
+      # AWS_BUCKET: s3-local
+      # AWS_ENDPOINT: http://localhost:4566
+      # IK_ENDPOINT: ""
+      # IK_PRIVATE_KEY: "private_"
+      # IK_PUBLIC_KEY: "public_"
+    depends_on:
+      - redis
+      - postgres
+
+  frontend:
+    container_name: files-service-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:3000
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7.4.2-alpine
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+volumes:
+  redis:
+  postgres:

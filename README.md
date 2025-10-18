@@ -22,6 +22,11 @@ File management system API built with [fastify](https://fastify.dev/)
   ![](./screenshots/auth.png)
   ![](./screenshots/client.png)
 
+## Docker
+
+- [frontend url: http://localhost](http://localhost)
+- [backend url: http://localhost:3001](http://localhost)
+
 ## Extras
 
 - [fastify template](https://github.com/jmrl23/fastify-template)
