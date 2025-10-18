@@ -1,6 +1,5 @@
 FROM node:lts-slim AS deps
 WORKDIR /app
-ENV VITE_IN_DOCKER=1
 
 COPY . .
 

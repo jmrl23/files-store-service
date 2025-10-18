@@ -24,8 +24,7 @@ File management system API built with [fastify](https://fastify.dev/)
 
 ## Docker
 
-- [frontend url: http://localhost](http://localhost)
-- [backend url: http://localhost:3001](http://localhost)
+- [URL: http://localhost](http://localhost)
 
 ## Extras
 

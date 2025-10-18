@@ -62,7 +62,7 @@ export function FilesTable(props: FilesTableProps) {
         {props.files?.map((file) => {
           const url = new URL(
             `/files/${file.path === '' ? '' : file.path + '/'}${file.name}`,
-            import.meta.env.DEV || import.meta.env.VITE_IN_DOCKER
+            import.meta.env.DEV
               ? 'http://localhost:3001'
               : window.location.origin,
           ).toString();
