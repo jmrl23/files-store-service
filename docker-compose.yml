@@ -28,8 +28,8 @@ services:
   frontend:
     container_name: files-service-frontend
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+     context: ./frontend
+     dockerfile: Dockerfile
     environment:
       BACKEND_URL: http://backend:3001
     ports:

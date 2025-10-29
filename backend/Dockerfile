@@ -1,36 +1,28 @@
-FROM node:lts-slim AS deps
-WORKDIR /app
-
-COPY ./package.json ./tsconfig.json ./yarn.lock ./
-
-RUN yarn install --production --immutable
-
 FROM node:lts-slim AS builder
 WORKDIR /app
 
-COPY --from=deps /app/package.json /app/tsconfig.json /app/yarn.lock ./
-
+COPY ./package.json ./tsconfig.json ./yarn.lock ./
 COPY ./src ./src
 COPY ./prisma ./prisma
 
 RUN yarn install
-RUN npx prisma generate --schema=./prisma/schema.prisma
-RUN yarn run build
+RUN apt-get update -y && apt-get install -y openssl
+RUN npx prisma generate
+RUN npx tsc --build
 
 FROM node:lts-slim
 WORKDIR /app
-RUN apt-get update -y && apt-get install -y openssl
-
-COPY --from=deps /app/node_modules ./node_modules
 
 COPY --from=builder /app/build ./build
-
-COPY ./local_uploads/.gitkeep ./local_uploads/.gitkeep
-COPY ./prisma ./prisma
 COPY ./public ./public
-COPY ./package.json /app/package.json
+COPY ./prisma ./prisma
+COPY ./local_uploads ./local_uploads
+COPY ./package.json ./yarn.lock ./
+COPY ./www ./www
 
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN yarn install --production --frozen-lockfile
+RUN chmod +x ./www
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node -r ./build/init.js build/main.js"]
+ENTRYPOINT [ "./www" ]
 
+CMD [ "." ]

@@ -1,0 +1,5 @@
+build
+node_modules
+/local_uploads/*
+!/local_uploads/.gitkeep
+generated

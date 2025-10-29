@@ -1,0 +1,7 @@
+#!/bin/sh
+
+RUN apt-get update -y && apt-get install -y openssl
+npx prisma migrate deploy
+npx prisma generate
+
+NODE_ENV='production' node -r ./build/init.js $@

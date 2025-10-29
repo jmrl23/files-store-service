@@ -12,12 +12,7 @@ export const swaggerPlugin = fastifyPlugin(async function (app) {
   const version: string =
     typeof packageJson.version === 'string' ? packageJson.version : '0.0.0';
 
-  const servers: OpenAPIV3_1.ServerObject[] = [
-    {
-      url: 'http://localhost:3001',
-      description: 'Default local development server',
-    },
-  ];
+  const servers: OpenAPIV3_1.ServerObject[] = [];
 
   await app.register(fastifySwagger, {
     prefix: '/docs',
