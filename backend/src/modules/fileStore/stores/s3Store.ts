@@ -7,8 +7,8 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import mime from 'mime-types';
 import { NotFound } from 'http-errors';
+import mime from 'mime-types';
 import { Readable } from 'node:stream';
 import { nanoid } from '../../../common/utils/nanoid';
 

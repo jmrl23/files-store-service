@@ -2,7 +2,7 @@ import { globSync } from 'glob';
 import mime from 'mime-types';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import { join as joinPaths } from 'node:path';
+import { join as joinPath } from 'node:path';
 
 export interface FileStoreOptions {
   dirPath: string;
@@ -16,8 +16,8 @@ export class LocalStore implements FileStore {
     fileName: string,
     path?: string,
   ): Promise<StoreFileInfo> {
-    const dirPath = joinPaths(this.options.dirPath, path ?? '');
-    const filePath = joinPaths(dirPath, crypto.randomUUID() + '-' + fileName);
+    const dirPath = joinPath(this.options.dirPath, path ?? '');
+    const filePath = joinPath(dirPath, crypto.randomUUID() + '-' + fileName);
 
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
@@ -42,7 +42,7 @@ export class LocalStore implements FileStore {
   }
 
   private async cleanDir(): Promise<void> {
-    const dirs = globSync(joinPaths(this.options.dirPath, '/**/*'), {
+    const dirs = globSync(joinPath(this.options.dirPath, '/**/*'), {
       absolute: true,
     }).filter((path) => fs.statSync(path).isDirectory());
     for (const dir of dirs) {

@@ -4,17 +4,14 @@ import { LocalStore } from './stores/localStore';
 import path from 'node:path';
 import { ImagekitStore } from './stores/imagekitStore';
 import ImageKit from 'imagekit';
+import { GcsStore } from './stores/gcsStore';
+import { Storage } from '@google-cloud/storage';
 
 /**
  * Register your custom stores here and don't forget to add StoreType.
- *
- * e.g.
- * ```ts
- * export type StoreType = 's3' | 'local';
- * ```
  */
 
-export type StoreType = 's3' | 'local' | 'imagekit';
+export type StoreType = 's3' | 'local' | 'imagekit' | 'gcs';
 
 export async function fileStoreFactory(
   storeType: StoreType,
@@ -50,5 +47,20 @@ export async function fileStoreFactory(
         }),
       );
       return imagekitStore;
+    case 'gcs':
+      const gcsStore = new GcsStore(
+        /**
+         * It uses the default environment variable `GOOGLE_APPLICATION_CREDENTIALS`
+         * for authentication
+         *
+         * Execute to login:
+         *    ```
+         *    gcloud auth application-default login
+         *    ```
+         */
+        new Storage(),
+      );
+      await gcsStore.initialize();
+      return gcsStore;
   }
 }

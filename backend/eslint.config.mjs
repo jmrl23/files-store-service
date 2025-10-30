@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 
 export default [
   {
-    ignores: ['build/*'],
+    ignores: ['build/*', 'generated/*'],
   },
   {
     languageOptions: {
