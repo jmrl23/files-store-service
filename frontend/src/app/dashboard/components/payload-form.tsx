@@ -132,22 +132,17 @@ export function PayloadForm(props: PayloadFormProps) {
         },
       }),
       {
-        loading: 'Uploading files..',
+        loading: 'Uploading',
         async success(response) {
           await props.revalidate();
           const files = response.data.data;
           return (
             <div>
-              {files.map((file, index) => (
-                <div key={file.id}>
-                  <p>
-                    {file.path} | {file.name}
-                  </p>
-                  {index < files.length - 1 && (
-                    <Separator orientation='horizontal' />
-                  )}
-                </div>
-              ))}
+              {files.length > 1 ? (
+                <p>Uploaded {files.length} files</p>
+              ) : (
+                <p>Uploaded {files.length} file</p>
+              )}
             </div>
           );
         },

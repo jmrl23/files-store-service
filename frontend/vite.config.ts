@@ -8,10 +8,6 @@ const backendURL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: {
-    host: '0.0.0.0',
-    port: 3000,
-  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -19,6 +15,14 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1000,
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    proxy: {
+      '/files': backendURL,
+      '/docs': backendURL,
+    },
   },
   preview: {
     host: '0.0.0.0',

@@ -60,11 +60,11 @@ export function FilesTable(props: FilesTableProps) {
       </TableHeader>
       <TableBody>
         {props.files?.map((file) => {
+          const path = file.path === '' ? '' : file.path + '/';
+          const filePath = path + file.name;
           const url = new URL(
-            `/files/${file.path === '' ? '' : file.path + '/'}${file.name}`,
-            import.meta.env.DEV
-              ? 'http://localhost:3001'
-              : window.location.origin,
+            `/files/${filePath}`,
+            window.location.origin,
           ).toString();
 
           return (

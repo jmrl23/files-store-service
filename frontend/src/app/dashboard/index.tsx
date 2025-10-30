@@ -1,5 +1,5 @@
-import { FilesTable } from '@/components/main-view/files-table';
-import { PayloadForm } from '@/components/main-view/payload-form';
+import { FilesTable } from '@/app/dashboard/components/files-table';
+import { PayloadForm } from '@/app/dashboard/components/payload-form';
 import { Separator } from '@/components/ui/separator';
 import { useFiles, UseFilesPayload } from '@/hooks/useFiles';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ now.setHours(23);
 now.setMinutes(59);
 now.setSeconds(59);
 
-function Main() {
+export function Dashboard() {
   const [payload, setPayload] = useState<UseFilesPayload>({
     skip: 0,
     take: 20,
@@ -36,5 +36,3 @@ function Main() {
     </main>
   );
 }
-
-export default Main;

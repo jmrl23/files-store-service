@@ -18,7 +18,7 @@ const formSchema = z.object({
   apiKey: z.string().min(1, { message: 'Must have at least 1 character' }),
 });
 
-function AuthView() {
+export function Auth() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,5 +76,3 @@ function AuthView() {
     </div>
   );
 }
-
-export default AuthView;
