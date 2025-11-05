@@ -16,7 +16,7 @@ yarn # or npm install
 ## Getting started
 
 1. Update environment variables `(DATABASE_URL, REDIS_URL, STORE_SERVICE)` based on your setup
-1. Run `npx prisma db push`
+1. Run `yarn exec drizzle-kit push`
 1. Run start script
 
 ## Note

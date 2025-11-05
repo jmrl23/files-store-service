@@ -1,21 +1,17 @@
 import { MultipartFile } from '@fastify/multipart';
-import { FileStoreService } from '../fileStore/fileStoreService';
 import { FromSchema } from 'json-schema-to-ts';
-import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
-import { NotFound } from 'http-errors';
-import { PrismaClient } from '../../../generated/prisma/client';
 import { ParsedQs } from 'qs';
+import { FileStoreService } from '../fileStore/fileStoreService';
+import { SavedFile } from '../fileStore/types';
+import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 
 export class FilesService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly fileStoreService: FileStoreService,
-  ) {}
+  constructor(private readonly fileStoreService: FileStoreService) {}
 
   public async uploadFiles(
     files: MultipartFile[],
     path?: string,
-  ): Promise<StoreFileInfo[]> {
+  ): Promise<SavedFile[]> {
     const uploadedFiles = await Promise.all(
       files.map(async (file) =>
         this.fileStoreService.uploadFile(
@@ -25,13 +21,12 @@ export class FilesService {
         ),
       ),
     );
-
     return uploadedFiles;
   }
 
   public async listFiles(
     payload: FromSchema<typeof ListFilesPayloadSchema> = {},
-  ): Promise<StoreFileInfo[]> {
+  ): Promise<SavedFile[]> {
     const result = await this.fileStoreService.listFiles(payload);
     return result;
   }
@@ -41,31 +36,15 @@ export class FilesService {
     path: string = '',
     query: ParsedQs = {},
   ): Promise<{
-    fileInfo: StoreFileInfo;
+    info: SavedFile;
     stream: NodeJS.ReadableStream;
   }> {
-    const file = await this.prisma.file.findFirst({
-      where: { name, path },
-      select: {
-        id: true,
-        createdAt: true,
-        name: true,
-        path: true,
-        mimetype: true,
-        size: true,
-      },
-    });
-
-    if (!file) throw NotFound('File not found');
-
+    const file = await this.fileStoreService.getFileInfo(name, path);
     const stream = await this.fileStoreService.streamFile(file.id, query);
-    return {
-      fileInfo: file,
-      stream,
-    };
+    return { info: file, stream };
   }
 
-  public async deleteFile(id: string): Promise<StoreFileInfo> {
+  public async deleteFile(id: string): Promise<SavedFile> {
     return await this.fileStoreService.deleteFile(id);
   }
 }

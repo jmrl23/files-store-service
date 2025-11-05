@@ -8,7 +8,8 @@ import ms from 'ms';
 import fs, { createWriteStream } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { prisma } from '../../common/prisma';
+import qs from 'qs';
+import { db } from '../../common/db';
 import { asRoute } from '../../common/typings';
 import { generateEtag } from '../../common/utils/generateEtag';
 import { fileStoreFactory } from '../fileStore/fileStoreFactory';
@@ -20,11 +21,9 @@ import { DeleteFileSchema } from './schemas/deleteFile.schema';
 import { FileSchema } from './schemas/file.schema';
 import { ListFilesPayloadSchema } from './schemas/listFilesPayload.schema';
 import { UploadFileSchema } from './schemas/uploadFile.schema';
-import qs from 'qs';
 
 export default asRoute(async function (app) {
   const filesService = new FilesService(
-    prisma,
     new FileStoreService(
       createCache({
         ttl: ms('30m'),
@@ -35,7 +34,7 @@ export default asRoute(async function (app) {
           }),
         ],
       }),
-      prisma,
+      db,
       await fileStoreFactory(process.env.STORE_SERVICE),
     ),
   );
@@ -115,8 +114,8 @@ export default asRoute(async function (app) {
           decodeURI(filePath),
           qs.parse(url.search ? url.search.substring(1) : ''),
         );
-        const tmpPath = path.resolve(os.tmpdir(), data.fileInfo.id);
-        const tmpFile = path.resolve(tmpPath, data.fileInfo.name);
+        const tmpPath = path.resolve(os.tmpdir(), data.info.id);
+        const tmpFile = path.resolve(tmpPath, data.info.name);
 
         if (!fs.existsSync(tmpPath)) {
           fs.mkdirSync(tmpPath, {
@@ -145,7 +144,7 @@ export default asRoute(async function (app) {
 
         reply.headers({
           'content-length': totalBytes,
-          'content-type': data.fileInfo.mimetype,
+          'content-type': data.info.mimetype,
           'cache-control': 'public, max-age=1800, must-revalidate',
           etag: await generateEtag(tmpFile),
         });

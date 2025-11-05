@@ -11,8 +11,9 @@ import { NotFound } from 'http-errors';
 import mime from 'mime-types';
 import { Readable } from 'node:stream';
 import { nanoid } from '../../../common/utils/nanoid';
+import { FileInStore, IFileStore } from '../types';
 
-export class S3Store implements FileStore {
+export class S3Store implements IFileStore {
   constructor(
     private readonly s3Client: S3Client,
     private readonly bucket?: string,
@@ -29,7 +30,7 @@ export class S3Store implements FileStore {
     }
   }
 
-  async uploadFile(buffer: Buffer, fileName: string): Promise<StoreFileInfo> {
+  async uploadFile(buffer: Buffer, fileName: string): Promise<FileInStore> {
     const key = `${nanoid(6)}-${fileName}`;
     const mimetype = mime.lookup(fileName) || 'application/octet-stream';
     const command = new PutObjectCommand({

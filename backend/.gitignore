@@ -7,7 +7,5 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 .env*.local
-/prisma/.env
 /local_uploads/*
 !/local_uploads/.gitkeep
-/generated

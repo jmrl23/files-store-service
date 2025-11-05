@@ -5,15 +5,16 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ParsedQs } from 'qs';
+import { FileInStore, IFileStore } from '../types';
 
-export class ImagekitStore implements FileStore {
+export class ImagekitStore implements IFileStore {
   constructor(private readonly imagekit: ImageKit) {}
 
   public async uploadFile(
     buffer: Buffer,
     fileName: string,
     path: string,
-  ): Promise<StoreFileInfo> {
+  ): Promise<FileInStore> {
     const file = await this.imagekit.upload({
       file: buffer,
       fileName,

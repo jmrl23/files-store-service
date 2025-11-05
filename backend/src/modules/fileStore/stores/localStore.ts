@@ -3,19 +3,20 @@ import mime from 'mime-types';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { join as joinPath } from 'node:path';
+import { FileInStore, IFileStore } from '../types';
 
 export interface FileStoreOptions {
   dirPath: string;
 }
 
-export class LocalStore implements FileStore {
+export class LocalStore implements IFileStore {
   constructor(private readonly options: FileStoreOptions) {}
 
   async uploadFile(
     buffer: Buffer,
     fileName: string,
     path?: string,
-  ): Promise<StoreFileInfo> {
+  ): Promise<FileInStore> {
     const dirPath = joinPath(this.options.dirPath, path ?? '');
     const filePath = joinPath(dirPath, crypto.randomUUID() + '-' + fileName);
 

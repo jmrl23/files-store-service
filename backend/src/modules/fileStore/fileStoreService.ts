@@ -1,171 +1,186 @@
 import { Cache } from 'cache-manager';
+import { and, asc, desc, eq, gte, ilike, lte, SQL } from 'drizzle-orm';
 import { BadRequest, NotFound } from 'http-errors';
 import { extname } from 'node:path';
-import { PrismaClient } from '../../../generated/prisma';
-import { nanoid } from '../../common/utils/nanoid';
+import qs from 'node:querystring';
 import { ParsedQs } from 'qs';
+import { Db } from '../../common/db';
+import { nanoid } from '../../common/utils/nanoid';
+import { file } from '../../db/schema';
+import { File, IFileStore, SavedFile } from './types';
+
+export type ListSavedFilesPayload = Partial<
+  Omit<File, 'createdAt' | 'store' | 'size'> & {
+    revalidate: boolean;
+    createdAtFrom: string;
+    createdAtTo: string;
+    skip: number;
+    take: number;
+    order: 'asc' | 'desc';
+    sizeFrom: number;
+    sizeTo: number;
+  }
+>;
 
 export class FileStoreService {
   constructor(
     private readonly cache: Cache,
-    private readonly prisma: PrismaClient,
-    private readonly fileStore: FileStore,
+    private readonly db: Db,
+    private readonly fileStore: IFileStore,
   ) {}
 
   async uploadFile(
     buffer: Buffer,
     fileName: string,
     path: string = '',
-  ): Promise<StoreFileInfo> {
+  ): Promise<SavedFile> {
     if (path?.includes('#') || path?.startsWith('/') || path?.endsWith('/')) {
       throw new BadRequest('Invalid path');
     }
-
-    const fileData = await this.fileStore.uploadFile(buffer, fileName, path);
-
-    function generateFileName(name: string): string {
-      const ext = extname(name);
-      const fileNameWithoutExtention = name.replace(ext, '');
-      const fileName = `${fileNameWithoutExtention}_${nanoid(6)}${ext}`;
-      return fileName;
-    }
-
-    const newFileName = generateFileName(fileName);
-
-    const conflictedFileCount = await this.prisma.file.count({
-      where: {
-        name: newFileName,
-      },
-    });
-
-    if (conflictedFileCount > 0) {
+    const uploadedFile = await this.fileStore.uploadFile(
+      buffer,
+      fileName,
+      path,
+    );
+    const generatedName = this.generateFilename(fileName);
+    const conflict = await this.db.$count(file, eq(file.name, generatedName));
+    if (conflict) {
       return await this.uploadFile(buffer, fileName, path);
     }
-
-    const result = await this.prisma.file.create({
-      data: {
-        key: fileData.id,
-        name: newFileName,
-        path: encodeURI(path),
-        size: fileData.size,
-        mimetype: fileData.mimetype,
+    const [savedFile] = await this.db
+      .insert(file)
+      .values({
         store: process.env.STORE_SERVICE,
-      },
-      select: {
-        id: true,
-        createdAt: true,
-        name: true,
-        size: true,
-        mimetype: true,
-        path: true,
-      },
-    });
+        mimetype: uploadedFile.mimetype,
+        size: uploadedFile.size,
+        name: generatedName,
+        key: uploadedFile.id,
+        path: encodeURI(path),
+      })
+      .returning({
+        id: file.id,
+        createdAt: file.createdAt,
+        name: file.name,
+        size: file.size,
+        mimetype: file.mimetype,
+        path: file.path,
+      });
 
-    return result;
+    return savedFile;
   }
 
-  async listFiles(payload: ListFilesPayload): Promise<StoreFileInfo[]> {
-    const cacheKey = `list:files[ref:payload]:(${JSON.stringify([
-      payload.id,
-      payload.createdAtFrom,
-      payload.createdAtTo,
-      payload.skip,
-      payload.take,
-      payload.order,
-      payload.name,
-      payload.mimetype,
-      payload.path,
-      payload.mimetype,
-      payload.sizeFrom,
-      payload.sizeTo,
-    ])})`;
-
-    if (payload.revalidate) {
-      await this.cache.del(cacheKey);
-    }
-
-    const cachedData = await this.cache.get<StoreFileInfo[]>(cacheKey);
+  async listFiles(payload: ListSavedFilesPayload): Promise<SavedFile[]> {
+    const { revalidate, ...PAYLOAD } = payload;
+    const CACHE_KEY = `files:${qs.encode(PAYLOAD)}`;
+    if (revalidate) await this.cache.del(CACHE_KEY);
+    const cachedData = await this.cache.get<SavedFile[]>(CACHE_KEY);
     if (cachedData) return cachedData;
 
-    const result = await this.prisma.file.findMany({
-      where: {
-        id: payload.id,
-        createdAt: {
-          gte: payload.createdAtFrom,
-          lte: payload.createdAtTo,
-        },
-        name: {
-          startsWith: payload.name,
-        },
-        path: payload.path ? encodeURI(payload.path) : payload.path,
-        mimetype: payload.mimetype,
-        size: {
-          gte: payload.sizeFrom,
-          lte: payload.sizeTo,
-        },
-        store: process.env.STORE_SERVICE,
-      },
-      skip: payload.skip,
-      take: payload.take,
-      orderBy: {
-        createdAt: payload.order,
-      },
-      select: {
-        id: true,
-        createdAt: true,
-        name: true,
-        size: true,
-        mimetype: true,
-        path: true,
-      },
-    });
+    let filesQuery = this.db
+      .select({
+        id: file.id,
+        createdAt: file.createdAt,
+        name: file.name,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+      })
+      .from(file)
+      .$dynamic();
 
-    await this.cache.set(cacheKey, result);
+    const conditions: (SQL | undefined)[] = [];
 
-    return result;
+    if (PAYLOAD.id) conditions.push(eq(file.id, PAYLOAD.id));
+    if (PAYLOAD.createdAtFrom)
+      conditions.push(gte(file.createdAt, PAYLOAD.createdAtFrom));
+    if (PAYLOAD.createdAtTo)
+      conditions.push(lte(file.createdAt, PAYLOAD.createdAtTo));
+    if (PAYLOAD.name) conditions.push(ilike(file.name, PAYLOAD.name + '%'));
+    if (PAYLOAD.path) conditions.push(eq(file.path, PAYLOAD.path));
+    if (PAYLOAD.mimetype) conditions.push(eq(file.mimetype, PAYLOAD.mimetype));
+    if (PAYLOAD.sizeFrom) conditions.push(gte(file.size, PAYLOAD.sizeFrom));
+    if (PAYLOAD.sizeTo) conditions.push(lte(file.size, PAYLOAD.sizeTo));
+
+    if (conditions.length > 0) {
+      filesQuery.where(and(...conditions.filter(Boolean)));
+    }
+
+    if (PAYLOAD.skip) filesQuery = filesQuery.offset(PAYLOAD.skip);
+    if (PAYLOAD.take) filesQuery = filesQuery.limit(PAYLOAD.take);
+
+    if (PAYLOAD.order === 'desc') {
+      filesQuery = filesQuery.orderBy(desc(file.createdAt));
+    } else {
+      filesQuery = filesQuery.orderBy(asc(file.createdAt));
+    }
+
+    const files = await filesQuery.execute();
+    await this.cache.set(CACHE_KEY, files);
+    return files;
+  }
+
+  async getFileInfo(name: string, path?: string): Promise<SavedFile> {
+    const fileQuery = this.db
+      .selectDistinct({
+        id: file.id,
+        createdAt: file.createdAt,
+        name: file.name,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+      })
+      .from(file)
+      .$dynamic();
+    const conditions: (SQL | undefined)[] = [eq(file.name, name)];
+    if (path) conditions.push(eq(file.path, path));
+    fileQuery.where(and(...conditions.filter(Boolean)));
+    const [savedFile] = await fileQuery.execute();
+    if (!savedFile) throw NotFound('File not fould');
+    return savedFile;
   }
 
   async streamFile(
     id: string,
     query: ParsedQs = {},
   ): Promise<NodeJS.ReadableStream> {
-    const file = await this.prisma.file.findUnique({
-      where: { id },
-      select: { key: true },
-    });
-
-    if (!file) {
-      throw new NotFound('File not found');
-    }
-
-    return await this.fileStore.streamFile(file.key, query);
+    const [savedFile] = await this.db
+      .selectDistinct({ key: file.key })
+      .from(file)
+      .where(eq(file.id, id));
+    if (!savedFile) throw new NotFound('File not found');
+    return await this.fileStore.streamFile(savedFile.key, query);
   }
 
-  async deleteFile(id: string): Promise<StoreFileInfo> {
-    const file = await this.prisma.file.findUnique({
-      where: { id, store: process.env.STORE_SERVICE },
-      select: {
-        id: true,
-        createdAt: true,
-        name: true,
-        key: true,
-        size: true,
-        mimetype: true,
-        path: true,
-      },
+  async deleteFile(id: string): Promise<SavedFile> {
+    const savedFile = await this.db.transaction(async (tx) => {
+      const [savedFile] = await tx
+        .select({
+          id: file.id,
+          createdAt: file.createdAt,
+          name: file.name,
+          key: file.key,
+          size: file.size,
+          mimetype: file.mimetype,
+          path: file.path,
+        })
+        .from(file)
+        .where(eq(file.id, id));
+      if (savedFile) {
+        await Promise.all([
+          this.db.delete(file).where(eq(file.id, id)),
+          this.fileStore.deleteFile(savedFile.key),
+        ]);
+      }
+      return savedFile;
     });
+    if (!savedFile) throw new NotFound('File not found');
+    return savedFile;
+  }
 
-    if (!file) {
-      throw new NotFound('File not found');
-    }
-
-    await Promise.allSettled([this.fileStore.deleteFile(file.key)]);
-    await this.prisma.file.delete({
-      where: { id },
-    });
-
-    delete (file as Record<string, unknown>).key;
-
-    return file;
+  private generateFilename(name: string): string {
+    const extension = extname(name);
+    name = name.substring(0, name.length - extension.length);
+    const filename = `${name}_${nanoid(6)}${extension}`;
+    return filename;
   }
 }

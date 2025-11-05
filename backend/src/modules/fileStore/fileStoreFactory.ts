@@ -1,11 +1,12 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { S3Store } from './stores/s3Store';
-import { LocalStore } from './stores/localStore';
-import path from 'node:path';
-import { ImagekitStore } from './stores/imagekitStore';
-import ImageKit from 'imagekit';
-import { GcsStore } from './stores/gcsStore';
 import { Storage } from '@google-cloud/storage';
+import ImageKit from 'imagekit';
+import path from 'node:path';
+import { GcsStore } from './stores/gcsStore';
+import { ImagekitStore } from './stores/imagekitStore';
+import { LocalStore } from './stores/localStore';
+import { S3Store } from './stores/s3Store';
+import { IFileStore } from './types';
 
 /**
  * Register your custom stores here and don't forget to add StoreType.
@@ -15,7 +16,7 @@ export type StoreType = 's3' | 'local' | 'imagekit' | 'gcs';
 
 export async function fileStoreFactory(
   storeType: StoreType,
-): Promise<FileStore> {
+): Promise<IFileStore> {
   switch (storeType) {
     case 's3':
       const s3Client = new S3Client({

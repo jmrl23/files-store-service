@@ -2,8 +2,9 @@ import { Bucket, Storage } from '@google-cloud/storage';
 import { NotFound, ServiceUnavailable } from 'http-errors';
 import mime from 'mime-types';
 import { join as joinPath } from 'node:path';
+import { FileInStore, IFileStore } from '../types';
 
-export class GcsStore implements FileStore {
+export class GcsStore implements IFileStore {
   private bucket!: Bucket;
 
   constructor(private readonly storage: Storage) {}
@@ -21,7 +22,7 @@ export class GcsStore implements FileStore {
     buffer: Buffer,
     fileName: string,
     path?: string,
-  ): Promise<StoreFileInfo> {
+  ): Promise<FileInStore> {
     const dirPath = joinPath(path ?? '');
     const filePath = joinPath(dirPath, crypto.randomUUID() + '-' + fileName);
     const file = this.bucket.file(filePath);
